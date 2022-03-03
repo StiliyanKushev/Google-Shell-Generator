@@ -54,15 +54,15 @@ const fs = require('fs');
         await page.waitForSelector(iframeSelector);
         let iframe = await page.frameLocator(iframeSelector);
 
-        if(await page.$("text=Start Cloud Shell")){
+        try {
             console.log(`${email} Accepting terms and conditions...`);
-            await iframe.locator("span.mat-checkbox-inner-container").click();
-            await iframe.locator("text=Start Cloud Shell").click();
-        }
+            await iframe.locator("span.mat-checkbox-inner-container").click({ timeout: 1000 });
+            await iframe.locator("text=Start Cloud Shell").click({ timeout: 1000 });
+        } catch {}
         
         // wait for the terminal to fully load
         console.log(`${email} Waiting for terminal to load...`);
-        await page.waitForLoadState('networkidle');
+        try { await page.waitForLoadState('networkidle', { timeout: 60000 }) } catch { }
         
         // focus the terminal
         console.log(`${email} focus terminal...`);
@@ -78,6 +78,25 @@ const fs = require('fs');
         await iframe.locator(`[spotlight-id="devshell-web-preview-button"]`).click();
         await iframe.locator(`text=Change port`).click();
         await iframe.locator(`[formcontrolname="port"]`).fill("6080");
-        await iframe.locator(`text=Change and Preview`).click();
+        const [ vncPage ] = await Promise.all([
+            context.waitForEvent('page'),
+            await iframe.locator(`text=Change and Preview`).click() // Opens a new tab
+        ]);
+
+        // refresh tab until vnc loads
+        const refresh = async () => {
+            try { await vncPage.waitForSelector("text=Couldn't connect to a server on port 6080", { timeout: 5000 }) } catch { }
+            if(await vncPage.$("text=Couldn't connect to a server on port 6080")) {
+                console.log(`${email} refreshing...`);
+                await vncPage.reload();
+                setTimeout(refresh, 20000);
+            }
+        }
+
+        console.log(`${email} refreshing every 20s until vnc loads...`);
+        await refresh();
+
+        console.log(`${email} vnc ready to be used!`);
+        vncPage.bringToFront();
     })
 })()
