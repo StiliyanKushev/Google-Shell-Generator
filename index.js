@@ -1,5 +1,6 @@
 const playwright = require('playwright');
 const fs = require('fs');
+const path = require('path');
 
 (async () => {
     // use firefox here, b/c it has real user agents
@@ -9,7 +10,15 @@ const fs = require('fs');
     let accounts = JSON.parse(fs.readFileSync("./accounts.json"));
 
     // make a browser window for each account
-    accounts.map(async ([email, password]) => {
+    accounts.map(async ([ email, password, scriptPath ]) => {
+        // concat relative script path
+        scriptPath = path.join(__dirname, scriptPath);
+
+        // throw error if any of the script files are invalid
+        if(scriptPath && (!fs.existsSync(scriptPath) || !fs.statSync(scriptPath).isFile())){
+            throw new Error(`${scriptPath} is invalid file path`);
+        }
+
         console.log(`${email} Setting up...`);
         const context = await browser.newContext();
         const page = await context.newPage();
@@ -83,20 +92,51 @@ const fs = require('fs');
             await iframe.locator(`text=Change and Preview`).click() // Opens a new tab
         ]);
 
-        // refresh tab until vnc loads
-        const refresh = async () => {
-            try { await vncPage.waitForSelector("text=Couldn't connect to a server on port 6080", { timeout: 5000 }) } catch { }
-            if(await vncPage.$("text=Couldn't connect to a server on port 6080")) {
+        console.log(`${email} refreshing every few seconds until vnc loads...`);
+        while(true){
+            const failSelector = "text=Couldn't connect to a server on port 6080";
+            try { await vncPage.waitForSelector(failSelector, { timeout: 5000 }) } catch { }
+            if(await vncPage.$(failSelector)) {
                 console.log(`${email} refreshing...`);
                 await vncPage.reload();
-                setTimeout(refresh, 20000);
-            }
+                await vncPage.waitForTimeout(5000);
+            } else break;
         }
 
-        console.log(`${email} refreshing every 20s until vnc loads...`);
-        await refresh();
+        console.log(`${email} vnc connected...`);
+        await vncPage.bringToFront();
 
-        console.log(`${email} vnc ready to be used!`);
-        vncPage.bringToFront();
+        // return if no script is provided
+        if(!scriptPath) return;
+
+        // todo make this one better
+        // todo maybe listen for canval event
+        console.log(`${email} waiting some time to make sure vnc is loaded...`);
+        await vncPage.waitForTimeout(5000);
+
+        // open the terminal
+        console.log(`${email} Openning terminal...`);
+        await vncPage.mouse.click(1, 1, { delay: 100 });      // reset screen state
+        await vncPage.waitForTimeout(300);
+        await vncPage.mouse.click(5, 715, { delay: 100 });    // main menu
+        await vncPage.waitForTimeout(300);
+        await vncPage.mouse.click(5, 545, { delay: 100 });    // system tools
+        await vncPage.waitForTimeout(300);
+        await vncPage.mouse.click(300, 580, { delay: 100 });  // terminal
+        await vncPage.waitForTimeout(300);
+        await vncPage.mouse.click(580, 290, { delay: 100 });  // focus the terminal
+        await vncPage.waitForTimeout(1000);                   // wait for terminal to popup
+
+        // send each line from script
+        console.log(`${email} is running ${scriptPath}`);
+        const scriptRaw = fs.readFileSync(scriptPath).toString();
+        for(let line of scriptRaw.split("\n")){
+            for(let char of line) {
+                await vncPage.keyboard.press(char);
+                await vncPage.waitForTimeout(300);
+            }
+            await vncPage.keyboard.press('Enter');
+        }
+        console.log(`${email} finished running script`);
     })
 })()
