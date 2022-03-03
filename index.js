@@ -13,6 +13,7 @@ const fs = require('fs');
         console.log(`${email} Setting up...`);
         const context = await browser.newContext();
         const page = await context.newPage();
+        await page.setDefaultTimeout(900000); // if you have many accounts this needs to be big
         await page.goto("https://console.cloud.google.com/freetrial/signup/tos?cloudshell=true");
 
         // it'll first be prompted to login in google account
@@ -28,7 +29,7 @@ const fs = require('fs');
 
         // press any potential "Not Now" or "Confirm" Buttons
         console.log(`${email} wait for network idle`);
-        await page.waitForLoadState('networkidle');
+        try { await page.waitForLoadState('networkidle', { timeout: 10000 }) } catch { }
         const authPopup = page.url().includes("gds.google.com") || page.url().includes("myaccount.google.com");
         
         // transate page to english if auth popup appears
@@ -58,9 +59,25 @@ const fs = require('fs');
             await iframe.locator("span.mat-checkbox-inner-container").click();
             await iframe.locator("text=Start Cloud Shell").click();
         }
+        
+        // wait for the terminal to fully load
+        console.log(`${email} Waiting for terminal to load...`);
+        await page.waitForLoadState('networkidle');
+        
+        // focus the terminal
+        console.log(`${email} focus terminal...`);
+        await iframe.locator(".active-terminal-frame").click();
+        
+        // enter zero day terminal code
+        console.log(`${email} enter payload...`);
+        await page.keyboard.type('docker run -p 6080:80 dorowu/ubuntu-desktop-lxde-vnc');
+        await page.keyboard.press('Enter');
 
-        // todo wait for the terminal to popup
-        // todo enter zero day terminal code
-        // todo open the webview
+        // open the webview
+        console.log(`${email} opening webview and changing port...`);
+        await iframe.locator(`[spotlight-id="devshell-web-preview-button"]`).click();
+        await iframe.locator(`text=Change port`).click();
+        await iframe.locator(`[formcontrolname="port"]`).fill("6080");
+        await iframe.locator(`text=Change and Preview`).click();
     })
 })()
