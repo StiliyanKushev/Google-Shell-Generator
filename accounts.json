@@ -1,3 +1,6 @@
 [
-    ["kushevboostnum1@gmail.com", "boostnum1Password", "/scripts/neofetch"]
+    ["kushevboostnum1@gmail.com", "boostnum1Password", "/scripts/snipesharp"],
+    ["kushevboostnum2@gmail.com", "boostnum2Password", "/scripts/snipesharp"],
+    ["kushevboostnum3@gmail.com", "boostnum3Password", "/scripts/snipesharp"],
+    ["kushevboostnum4@gmail.com", "boostnum4Password", "/scripts/snipesharp"]
 ]

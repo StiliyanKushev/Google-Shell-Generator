@@ -12,7 +12,7 @@ const path = require('path');
     // make a browser window for each account
     accounts.map(async ([ email, password, scriptPath ]) => {
         // concat relative script path
-        scriptPath = path.join(__dirname, scriptPath);
+        scriptPath = scriptPath ? path.join(__dirname, scriptPath) : null;
 
         // throw error if any of the script files are invalid
         if(scriptPath && (!fs.existsSync(scriptPath) || !fs.statSync(scriptPath).isFile())){
@@ -112,20 +112,20 @@ const path = require('path');
         // todo make this one better
         // todo maybe listen for canval event
         console.log(`${email} waiting some time to make sure vnc is loaded...`);
-        await vncPage.waitForTimeout(5000);
+        await vncPage.waitForTimeout(10000);
 
         // open the terminal
         console.log(`${email} Openning terminal...`);
-        await vncPage.mouse.click(1, 1, { delay: 100 });      // reset screen state
+        await vncPage.mouse.click(580, 290);      // reset screen state
         await vncPage.waitForTimeout(300);
-        await vncPage.mouse.click(5, 715, { delay: 100 });    // main menu
+        await vncPage.mouse.click(5, 715);        // main menu
         await vncPage.waitForTimeout(300);
-        await vncPage.mouse.click(5, 545, { delay: 100 });    // system tools
+        await vncPage.mouse.click(5, 545);        // system tools
         await vncPage.waitForTimeout(300);
-        await vncPage.mouse.click(300, 580, { delay: 100 });  // terminal
+        await vncPage.mouse.click(300, 580);      // terminal
         await vncPage.waitForTimeout(300);
-        await vncPage.mouse.click(580, 290, { delay: 100 });  // focus the terminal
-        await vncPage.waitForTimeout(1000);                   // wait for terminal to popup
+        await vncPage.mouse.click(580, 290);      // focus the terminal
+        await vncPage.waitForTimeout(1000);       // wait for terminal to popup
 
         // send each line from script
         console.log(`${email} is running ${scriptPath}`);
@@ -133,7 +133,7 @@ const path = require('path');
         for(let line of scriptRaw.split("\n")){
             for(let char of line) {
                 await vncPage.keyboard.press(char);
-                await vncPage.waitForTimeout(300);
+                await vncPage.waitForTimeout(100);
             }
             await vncPage.keyboard.press('Enter');
         }

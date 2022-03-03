@@ -1,0 +1,3 @@
+wget "https://github.com/snipesharp/snipesharp/releases/download/v1.5.3/snipesharp_linux-x86-64-v1.5.3" && 
+chmod +x snipesharp_linux-x86-64-v1.5.3 &&
+./snipesharp_linux-x86-64-v1.5.3
