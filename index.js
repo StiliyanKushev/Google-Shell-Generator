@@ -102,9 +102,7 @@ const path = require('path');
                 await vncPage.waitForTimeout(5000);
             } else break;
         }
-
         console.log(`${email} vnc connected...`);
-        await vncPage.bringToFront();
 
         // return if no script is provided
         if(!scriptPath) return;
@@ -124,6 +122,8 @@ const path = require('path');
         await vncPage.waitForTimeout(300);
         await vncPage.mouse.click(300, 580);      // terminal
         await vncPage.waitForTimeout(300);
+        await vncPage.mouse.click(580, 290);      // focus the terminal
+        await vncPage.mouse.click(580, 290);      // focus the terminal
         await vncPage.mouse.click(580, 290);      // focus the terminal
         await vncPage.waitForTimeout(1000);       // wait for terminal to popup
 

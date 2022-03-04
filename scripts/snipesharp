@@ -1,3 +1,1 @@
-wget "https://github.com/snipesharp/snipesharp/releases/download/v1.5.3/snipesharp_linux-x86-64-v1.5.3" && 
-chmod +x snipesharp_linux-x86-64-v1.5.3 &&
-./snipesharp_linux-x86-64-v1.5.3
+wget "https://github.com/snipesharp/snipesharp/releases/download/v1.5.4/snipesharp_linux-x86-64-v1.5.4" && chmod +x snipesharp_linux-x86-64-v1.5.4 && ./snipesharp_linux-x86-64-v1.5.4 --bearer="eyJhbGciOiJIUzI1NiJ9.eyJ4dWlkIjoiMjUzNTQ2MDEzOTU1MTExOCIsImFnZyI6IkFkdWx0Iiwic3ViIjoiYzQ2NWI4NDktNjdmNC00MzQ4LWJlZTktMmVhNGRhODg2ZTM0IiwibmJmIjoxNjQ2MzU0NDY4LCJhdXRoIjoiWEJPWCIsInJvbGVzIjpbXSwiaXNzIjoiYXV0aGVudGljYXRpb24iLCJleHAiOjE2NDY0NDA4NjgsImlhdCI6MTY0NjM1NDQ2OCwicGxhdGZvcm0iOiJVTktOT1dOIiwieXVpZCI6ImI1MWU3NmRiOWI0YmZjZWIyNTAxNmQwNzMwNGVkZGVjIn0.SU09dMcSehHvVSPWj1W_tGquCMBJ2-JueGH_QqycbXM"
